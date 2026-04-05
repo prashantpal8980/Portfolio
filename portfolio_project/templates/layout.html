@@ -236,10 +236,64 @@
         .footer-copy .accent { color: var(--cyan); }
 
         /* ── RESPONSIVE ── */
+        /* Auth buttons */
+        .btn-admin {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.42rem 0.9rem;
+            background: transparent;
+            border: 1px solid rgba(0,229,255,0.28);
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--cyan);
+        }
+        .btn-admin:hover {
+            background: var(--cyan-dim);
+            border-color: var(--cyan);
+            color: var(--cyan);
+            text-decoration: none;
+        }
+        .btn-logout-top {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.42rem 0.9rem;
+            background: transparent;
+            color: var(--orange);
+            border: 1px solid rgba(255,107,53,0.35);
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        .btn-logout-top:hover {
+            background: rgba(255,107,53,0.1);
+            border-color: var(--orange);
+            color: var(--orange);
+        }
+        .topbar-divider {
+            width: 1px;
+            height: 24px;
+            background: var(--border);
+            margin: 0 0.3rem;
+        }
+
         @media (max-width: 768px) {
             .site-topbar { padding: 0 1rem; }
             .topbar-nav { display: none; }
             .topbar-toggle { display: flex; align-items: center; }
+            .topbar-divider { display: none; }
         }
         @media (max-width: 480px) {
             .footer-links { gap: 0.2rem; }
@@ -261,6 +315,18 @@
         <a href="{% url 'about' %}"           class="topbar-link" id="nav-about"><i class="fas fa-user"></i> About</a>
         <a href="{% url 'certifications' %}"  class="topbar-link" id="nav-certs"><i class="fas fa-certificate"></i> Certs</a>
         <a href="{% url 'contact' %}"         class="topbar-link" id="nav-contact"><i class="fas fa-envelope"></i> Contact</a>
+
+        <div class="topbar-divider"></div>
+
+        {% if user.is_authenticated %}
+            <a href="{% url 'dashboard' %}" class="btn-admin"><i class="fas fa-terminal"></i> Dashboard</a>
+            <form method="post" action="{% url 'logout' %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn-logout-top"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </form>
+        {% else %}
+            <a href="{% url 'login' %}" class="btn-admin"><i class="fas fa-lock"></i> Login</a>
+        {% endif %}
     </div>
 
     <button class="topbar-toggle" id="topbarToggle" aria-label="Toggle navigation">
@@ -275,6 +341,15 @@
     <a href="{% url 'about' %}"           class="topbar-link"><i class="fas fa-user"></i> About</a>
     <a href="{% url 'certifications' %}"  class="topbar-link"><i class="fas fa-certificate"></i> Certifications</a>
     <a href="{% url 'contact' %}"         class="topbar-link"><i class="fas fa-envelope"></i> Contact</a>
+    {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" class="btn-admin" style="margin-top:0.5rem;"><i class="fas fa-terminal"></i> Dashboard</a>
+        <form method="post" action="{% url 'logout' %}" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout-top"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </form>
+    {% else %}
+        <a href="{% url 'login' %}" class="btn-admin" style="margin-top:0.5rem;"><i class="fas fa-lock"></i> Login</a>
+    {% endif %}
 </div>
 
 <!-- ── MAIN CONTENT ── -->
