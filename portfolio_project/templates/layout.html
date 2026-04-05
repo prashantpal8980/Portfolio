@@ -5,94 +5,352 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Portfolio{% endblock %}</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% block head_extra %}{% endblock %}
     <style>
+        :root {
+            --bg-void:    #050508;
+            --bg-deep:    #0a0a14;
+            --bg-surface: #0f0f1e;
+            --bg-card:    rgba(15,15,35,0.95);
+            --cyan:       #00e5ff;
+            --cyan-dim:   rgba(0,229,255,0.10);
+            --cyan-glow:  rgba(0,229,255,0.35);
+            --green:      #39ff14;
+            --green-dim:  rgba(57,255,20,0.1);
+            --purple:     #a855f7;
+            --orange:     #ff6b35;
+            --red:        #ff4757;
+            --text-hi:    #f0f4ff;
+            --text-mid:   #8892b0;
+            --text-lo:    #4a5568;
+            --border:     rgba(0,229,255,0.14);
+            --font-display: 'Orbitron', monospace;
+            --font-body:    'Exo 2', sans-serif;
+            --font-mono:    'JetBrains Mono', monospace;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            background-color: #343a40; /* Dark background color (adjust as needed) */
-            color: #f8f9fa; /* Light text color for readability */
+            background: var(--bg-void);
+            color: var(--text-hi);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
         }
-        .navbar-light .navbar-nav .nav-link {
-            color: #f8f9fa; /* Light text color for navbar links */
+
+        /* ── TOPBAR ── */
+        .site-topbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(5,5,8,0.92);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 2rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
         }
-        .navbar-light .navbar-brand {
-            color: #f8f9fa;
+
+        .topbar-brand {
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            color: var(--text-hi);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-shrink: 0;
+            transition: color 0.25s ease;
         }
-        .navbar-light .navbar-toggler-icon {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(248, 249, 250, 1)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e"); /* Light color for navbar toggler */
+        .topbar-brand i { color: var(--cyan); }
+        .topbar-brand:hover { color: var(--cyan); text-decoration: none; }
+
+        .topbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
         }
-        .footer {
-            background-color: #212529; /* Darker footer background */
+
+        .topbar-link {
+            font-family: var(--font-mono);
+            font-size: 0.68rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 0.42rem 0.9rem;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 3px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.25s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            color: var(--text-mid);
+        }
+        .topbar-link:hover {
+            border-color: var(--border);
+            color: var(--cyan);
+            text-decoration: none;
+        }
+        .topbar-link.active {
+            color: var(--cyan);
+            border-color: rgba(0,229,255,0.28);
+            background: var(--cyan-dim);
+        }
+
+        /* Hamburger for mobile */
+        .topbar-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            color: var(--text-mid);
+            padding: 0.5rem 0.7rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+        .topbar-toggle:hover { color: var(--cyan); border-color: var(--cyan); }
+
+        /* Mobile nav drawer */
+        .topbar-drawer {
+            display: none;
+            flex-direction: column;
+            background: rgba(5,5,8,0.97);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            gap: 0.4rem;
+        }
+        .topbar-drawer.open { display: flex; }
+        .topbar-drawer .topbar-link {
+            padding: 0.6rem 1rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+        }
+
+        /* Main content flex grow */
+        .site-main {
+            flex: 1;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── FOOTER ── */
+        .site-footer {
+            position: relative;
+            z-index: 1;
+            background: rgba(5,5,8,0.95);
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 2rem 2rem;
+        }
+
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .footer-brand {
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            color: var(--text-hi);
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .footer-brand i { color: var(--cyan); }
+
+        .footer-links {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .footer-link {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-lo);
+            text-decoration: none;
+            padding: 0.3rem 0.7rem;
+            border-radius: 2px;
+            transition: all 0.25s ease;
+        }
+        .footer-link:hover { color: var(--cyan); text-decoration: none; }
+        .footer-sep {
+            color: var(--text-lo);
+            font-size: 0.5rem;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 0.75rem;
+        }
+        .footer-social a {
+            width: 34px; height: 34px;
+            border: 1px solid var(--border);
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-lo);
+            font-size: 0.85rem;
+            text-decoration: none;
+            transition: all 0.25s ease;
+        }
+        .footer-social a:hover {
+            color: var(--cyan);
+            border-color: var(--cyan);
+            background: var(--cyan-dim);
+            box-shadow: 0 0 12px var(--cyan-dim);
+        }
+
+        .footer-copy {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            color: var(--text-lo);
+            text-align: center;
+        }
+        .footer-copy .accent { color: var(--cyan); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .site-topbar { padding: 0 1rem; }
+            .topbar-nav { display: none; }
+            .topbar-toggle { display: flex; align-items: center; }
+        }
+        @media (max-width: 480px) {
+            .footer-links { gap: 0.2rem; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        {% block header %}
-            <div class="container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-auto">
-                        <h1>My Portfolio</h1>
-                    </div>
-                    <div class="col-auto">
-                        {% if user.is_authenticated %}
-                        <form method="post" action="{% url 'logout' %}" class="d-inline">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-danger">Logout</button>
-                        </form>
-                        
-                    {% else %}
-                        {% comment %} <a href="{% url 'register'%}" class="btn btn-primary mx-2">Register</a> {% endcomment %}
-                        <a href="{% url 'login'%}" class="btn btn-success mx-2">login</a>
-                    {% endif %}
-                    </div>
-                </div>
-            </div>
-        {% endblock %}
-    </header>
+<!-- ── TOPBAR ── -->
+<nav class="site-topbar" id="siteTopbar">
+    <a href="{% url 'portfolio' %}" class="topbar-brand">
+        <i class="fas fa-shield-halved"></i>
+        PRASHANT PAL
+    </a>
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'portfolio' %}">My Portfolio</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'portfolio' %}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'projects' %}">Projects</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'about' %}">About</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'certifications' %}">Certifications</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'contact' %}">Contact</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+    <div class="topbar-nav" id="topbarNav">
+        <a href="{% url 'portfolio' %}"       class="topbar-link" id="nav-home"><i class="fas fa-house"></i> Home</a>
+        <a href="{% url 'projects' %}"        class="topbar-link" id="nav-projects"><i class="fas fa-folder-open"></i> Projects</a>
+        <a href="{% url 'about' %}"           class="topbar-link" id="nav-about"><i class="fas fa-user"></i> About</a>
+        <a href="{% url 'certifications' %}"  class="topbar-link" id="nav-certs"><i class="fas fa-certificate"></i> Certs</a>
+        <a href="{% url 'contact' %}"         class="topbar-link" id="nav-contact"><i class="fas fa-envelope"></i> Contact</a>
+    </div>
 
+    <button class="topbar-toggle" id="topbarToggle" aria-label="Toggle navigation">
+        <i class="fas fa-bars"></i>
+    </button>
+</nav>
+
+<!-- Mobile drawer -->
+<div class="topbar-drawer" id="topbarDrawer">
+    <a href="{% url 'portfolio' %}"       class="topbar-link"><i class="fas fa-house"></i> Home</a>
+    <a href="{% url 'projects' %}"        class="topbar-link"><i class="fas fa-folder-open"></i> Projects</a>
+    <a href="{% url 'about' %}"           class="topbar-link"><i class="fas fa-user"></i> About</a>
+    <a href="{% url 'certifications' %}"  class="topbar-link"><i class="fas fa-certificate"></i> Certifications</a>
+    <a href="{% url 'contact' %}"         class="topbar-link"><i class="fas fa-envelope"></i> Contact</a>
+</div>
+
+<!-- ── MAIN CONTENT ── -->
+<main class="site-main">
     {% block body_content %}
-    <div class="container mt-4">
+    <div>
         {% block content %}{% endblock %}
     </div>
     {% endblock body_content %}
+</main>
 
-    <footer class="footer text-center py-3 mt-4">
-        <p>&copy; {% now "Y" %} My Portfolio. All rights reserved.</p>
-        {% block footer_extra %}{% endblock %}
-    </footer>
+<!-- ── FOOTER ── -->
+<footer class="site-footer">
+    <div class="footer-inner">
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    {% block scripts_extra %}{% endblock %}
-    {% block scriptsextra %}{% endblock %}
+        <div class="footer-brand">
+            <i class="fas fa-shield-halved"></i>
+            PRASHANT PAL
+        </div>
+
+        <div class="footer-links">
+            <a href="{% url 'portfolio' %}"      class="footer-link">Home</a>
+            <span class="footer-sep">◈</span>
+            <a href="{% url 'projects' %}"       class="footer-link">Projects</a>
+            <span class="footer-sep">◈</span>
+            <a href="{% url 'about' %}"          class="footer-link">About</a>
+            <span class="footer-sep">◈</span>
+            <a href="{% url 'certifications' %}" class="footer-link">Certifications</a>
+            <span class="footer-sep">◈</span>
+            <a href="{% url 'contact' %}"        class="footer-link">Contact</a>
+        </div>
+
+        <div class="footer-social">
+            <a href="https://github.com/" target="_blank" aria-label="GitHub"><i class="fab fa-github"></i></a>
+            <a href="https://linkedin.com/" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="mailto:prashant@example.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+        </div>
+
+        <p class="footer-copy">
+            &copy; {% now "Y" %} <span class="accent">PRASHANT PAL</span> — All rights reserved.
+            &nbsp;|&nbsp; Cybersecurity Engineer &amp; Developer
+        </p>
+
+    </div>
+</footer>
+
+{% block scripts_extra %}{% endblock %}
+{% block scriptsextra %}{% endblock %}
+
+<script>
+    // Mobile drawer toggle
+    const toggle = document.getElementById('topbarToggle');
+    const drawer = document.getElementById('topbarDrawer');
+    toggle.addEventListener('click', () => {
+        drawer.classList.toggle('open');
+        const icon = toggle.querySelector('i');
+        icon.classList.toggle('fa-bars');
+        icon.classList.toggle('fa-xmark');
+    });
+
+    // Active nav link highlighting based on current URL
+    const path = window.location.pathname;
+    const navMap = {
+        'nav-home':     ['/', '/portfolio/'],
+        'nav-projects': ['/projects/'],
+        'nav-about':    ['/about/'],
+        'nav-certs':    ['/certifications/'],
+        'nav-contact':  ['/contact/'],
+    };
+    Object.entries(navMap).forEach(([id, paths]) => {
+        const el = document.getElementById(id);
+        if (el && paths.some(p => path === p || (p.length > 1 && path.startsWith(p)))) {
+            el.classList.add('active');
+        }
+    });
+</script>
+
 </body>
 </html>
