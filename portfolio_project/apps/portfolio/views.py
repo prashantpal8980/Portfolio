@@ -51,9 +51,14 @@ def contact(request):
 
 
 def certifications(request):
-    cutoff = timezone.now().date() - timedelta(days=180)
-    certs  = Certification.objects.all().order_by('display_order', '-issue_date')
-    return render(request, 'certifications.html', {'certs': certs, 'recent_cutoff': cutoff})
+    cutoff            = timezone.now().date() - timedelta(days=180)
+    certs             = Certification.objects.all().order_by('display_order', '-issue_date')
+    highlighted_certs = certs.filter(is_highlighted=True)
+    return render(request, 'certifications.html', {
+        'certs':             certs,
+        'highlighted_certs': highlighted_certs,
+        'recent_cutoff':     cutoff,
+    })
 
 
 # ── Admin / Messages Dashboard ────────────────────────────────────────────────
