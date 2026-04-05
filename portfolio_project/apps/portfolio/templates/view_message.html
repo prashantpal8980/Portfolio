@@ -1,0 +1,420 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Message from {{ message.name }} — Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root {
+      --bg-void: #050508;
+      --bg-deep: #0a0a14;
+      --bg-card: rgba(15,15,35,0.95);
+      --cyan: #00e5ff;
+      --cyan-dim: rgba(0,229,255,0.10);
+      --cyan-glow: rgba(0,229,255,0.35);
+      --green: #39ff14;
+      --purple: #a855f7;
+      --orange: #ff6b35;
+      --red: #ff4757;
+      --red-dim: rgba(255,71,87,0.12);
+      --text-hi: #f0f4ff;
+      --text-mid: #8892b0;
+      --text-lo: #4a5568;
+      --border: rgba(0,229,255,0.14);
+      --font-display: 'Orbitron', monospace;
+      --font-body: 'Exo 2', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg-void);
+      color: var(--text-hi);
+      font-family: var(--font-body);
+      min-height: 100vh;
+    }
+
+    /* Animated grid */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(5,5,8,0.92);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .topbar-brand {
+      font-family: var(--font-display);
+      font-size: 0.85rem; font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-hi);
+      display: flex; align-items: center; gap: 0.8rem;
+    }
+    .topbar-brand i { color: var(--cyan); }
+
+    .topbar-right { display: flex; align-items: center; gap: 0.8rem; }
+
+    .btn-nav {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.45rem 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-nav { color: var(--text-mid); }
+    .btn-nav:hover { border-color: var(--cyan); color: var(--cyan); }
+    .btn-nav.cyan { color: var(--cyan); border-color: rgba(0,229,255,0.3); }
+    .btn-nav.cyan:hover { background: var(--cyan-dim); }
+    .btn-nav.orange { color: var(--orange); border-color: rgba(255,107,53,0.3); }
+    .btn-nav.orange:hover { background: rgba(255,107,53,0.08); border-color: var(--orange); }
+
+    /* ── MAIN ── */
+    .main {
+      position: relative; z-index: 1;
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+      animation: fadeUp 0.55s ease forwards;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── BREADCRUMB ── */
+    .breadcrumb {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      color: var(--text-lo);
+      margin-bottom: 1.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .breadcrumb a { color: var(--cyan); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb i { font-size: 0.5rem; }
+
+    /* ── MESSAGE CARD ── */
+    .msg-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .msg-card:hover {
+      border-color: rgba(0,229,255,0.22);
+      box-shadow: 0 28px 80px rgba(0,0,0,0.55);
+    }
+
+    /* Header strip */
+    .msg-header {
+      background: linear-gradient(135deg, rgba(0,229,255,0.06), rgba(168,85,247,0.06));
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 2.4rem;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .msg-sender {
+      display: flex;
+      align-items: center;
+      gap: 1.2rem;
+    }
+    .avatar {
+      width: 54px; height: 54px;
+      border-radius: 50%;
+      background: conic-gradient(var(--cyan), var(--purple), var(--cyan));
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      flex-shrink: 0;
+      animation: spin 12s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .avatar-inner {
+      position: absolute;
+      inset: 2px;
+      border-radius: 50%;
+      background: var(--bg-deep);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 1rem; font-weight: 900;
+      color: var(--cyan);
+      letter-spacing: 0.05em;
+    }
+    .sender-name {
+      font-family: var(--font-display);
+      font-size: 1.1rem; font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-hi);
+      margin-bottom: 0.3rem;
+    }
+    .sender-email a {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--cyan);
+      text-decoration: none;
+      letter-spacing: 0.04em;
+    }
+    .sender-email a:hover { text-decoration: underline; }
+
+    /* Meta tags (date / ID) */
+    .msg-meta-tags {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.4rem;
+    }
+    .meta-tag {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--text-lo);
+      display: flex; align-items: center; gap: 0.4rem;
+    }
+    .meta-tag i { color: var(--cyan); font-size: 0.6rem; }
+
+    /* Body */
+    .msg-body { padding: 2.4rem; }
+
+    /* Subject chip */
+    .subject-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0,229,255,0.07);
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 3px;
+      padding: 0.4rem 0.9rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      color: var(--cyan);
+      margin-bottom: 1.8rem;
+    }
+    .subject-chip i { font-size: 0.7rem; }
+    .subject-none { color: var(--text-lo); font-style: italic; }
+
+    /* Section label */
+    .field-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-lo);
+      margin-bottom: 0.6rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .field-label i { color: var(--cyan); }
+    .field-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+      max-width: 60px;
+    }
+
+    /* Message body text */
+    .msg-text {
+      background: rgba(0,229,255,0.025);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1.6rem 1.8rem;
+      font-size: 0.97rem;
+      line-height: 1.9;
+      color: var(--text-hi);
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--font-body);
+      min-height: 140px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+      margin: 2rem 0;
+    }
+
+    /* Action bar */
+    .action-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .btn-action {
+      font-family: var(--font-display);
+      font-size: 0.73rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0.75rem 1.6rem;
+      border-radius: 3px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .btn-action.primary {
+      background: var(--cyan);
+      color: var(--bg-void);
+      box-shadow: 0 0 18px var(--cyan-glow);
+    }
+    .btn-action.primary:hover {
+      box-shadow: 0 0 35px var(--cyan-glow);
+      transform: translateY(-2px);
+    }
+    .btn-action.ghost {
+      background: transparent;
+      color: var(--text-mid);
+      border-color: var(--border);
+    }
+    .btn-action.ghost:hover { border-color: var(--cyan); color: var(--cyan); }
+    .btn-action.danger {
+      background: transparent;
+      color: var(--red);
+      border-color: rgba(255,71,87,0.3);
+    }
+    .btn-action.danger:hover { background: var(--red-dim); border-color: var(--red); }
+
+    .spacer { flex: 1; }
+    .msg-id-note {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--text-lo);
+      letter-spacing: 0.08em;
+    }
+
+    @media (max-width: 600px) {
+      .msg-header { flex-direction: column; }
+      .msg-meta-tags { align-items: flex-start; }
+      .main { padding: 2rem 1rem 4rem; }
+      .msg-body { padding: 1.5rem; }
+      .action-bar { flex-direction: column; align-items: stretch; }
+      .btn-action { justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── TOPBAR ── -->
+<nav class="topbar">
+  <div class="topbar-brand">
+    <i class="fas fa-terminal"></i>
+    ADMIN PANEL
+  </div>
+  <div class="topbar-right">
+    <a href="{% url 'dashboard' %}" class="btn-nav">
+      <i class="fas fa-arrow-left"></i> Dashboard
+    </a>
+    <a href="{% url 'edit_message' message.pk %}" class="btn-nav cyan">
+      <i class="fas fa-pen"></i> Edit
+    </a>
+  </div>
+</nav>
+
+<!-- ── MAIN ── -->
+<main class="main">
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a href="{% url 'dashboard' %}">Dashboard</a>
+    <i class="fas fa-chevron-right"></i>
+    <span>Message #{{ message.pk }}</span>
+  </div>
+
+  <!-- Card -->
+  <div class="msg-card">
+
+    <!-- Header -->
+    <div class="msg-header">
+      <div class="msg-sender">
+        <div class="avatar">
+          <div class="avatar-inner">{{ message.name|slice:":2"|upper }}</div>
+        </div>
+        <div>
+          <div class="sender-name">{{ message.name }}</div>
+          <div class="sender-email"><a href="mailto:{{ message.email }}">{{ message.email }}</a></div>
+        </div>
+      </div>
+      <div class="msg-meta-tags">
+        <div class="meta-tag"><i class="fas fa-clock"></i> {{ message.submitted_at|date:"d M Y, H:i" }}</div>
+        <div class="meta-tag"><i class="fas fa-hashtag"></i> ID {{ message.pk }}</div>
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="msg-body">
+
+      <!-- Subject -->
+      {% if message.subject %}
+        <div class="subject-chip"><i class="fas fa-tag"></i>{{ message.subject }}</div>
+      {% else %}
+        <div class="subject-chip"><i class="fas fa-tag"></i><span class="subject-none">No subject provided</span></div>
+      {% endif %}
+
+      <!-- Message text -->
+      <div class="field-label"><i class="fas fa-comment-dots"></i> Message</div>
+      <div class="msg-text">{{ message.message }}</div>
+
+      <div class="divider"></div>
+
+      <!-- Actions -->
+      <div class="action-bar">
+        <a href="{% url 'edit_message' message.pk %}" class="btn-action primary">
+          <i class="fas fa-pen"></i> Edit Message
+        </a>
+        <a href="{% url 'dashboard' %}" class="btn-action ghost">
+          <i class="fas fa-arrow-left"></i> Back
+        </a>
+        <div class="spacer"></div>
+        <form method="post" action="{% url 'delete_message' message.pk %}" style="display:inline;"
+              onsubmit="return confirm('Permanently delete this message from {{ message.name }}?');">
+          {% csrf_token %}
+          <button type="submit" class="btn-action danger">
+            <i class="fas fa-trash"></i> Delete
+          </button>
+        </form>
+        <span class="msg-id-note">Ref #{{ message.pk }}</span>
+      </div>
+
+    </div><!-- /.msg-body -->
+  </div><!-- /.msg-card -->
+
+</main>
+</body>
+</html>

@@ -1,0 +1,401 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if mode == 'add' %}Add{% else %}Edit{% endif %} Project — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root{
+      --bg-void:#050508;--bg-deep:#0a0a14;--bg-card:rgba(15,15,35,.96);
+      --cyan:#00e5ff;--cyan-dim:rgba(0,229,255,.1);--cyan-glow:rgba(0,229,255,.35);
+      --gold:#ffd700;--purple:#a855f7;--orange:#ff6b35;--red:#ff4757;--green:#39ff14;
+      --text-hi:#f0f4ff;--text-mid:#8892b0;--text-lo:#4a5568;
+      --border:rgba(0,229,255,.14);
+      --font-display:'Orbitron',monospace;--font-body:'Exo 2',sans-serif;--font-mono:'JetBrains Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg-void);color:var(--text-hi);font-family:var(--font-body);min-height:100vh;}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);background-size:50px 50px;pointer-events:none;z-index:0;}
+
+    .topbar{position:sticky;top:0;z-index:100;background:rgba(5,5,8,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;}
+    .topbar-brand{font-family:var(--font-display);font-size:.85rem;font-weight:700;letter-spacing:.1em;display:flex;align-items:center;gap:.8rem;color:var(--text-hi);}
+    .topbar-brand i{color:var(--cyan);}
+    .btn-back{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;padding:.45rem 1rem;background:transparent;color:var(--text-mid);border:1px solid var(--border);border-radius:3px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:.4rem;}
+    .btn-back:hover{border-color:var(--cyan);color:var(--cyan);}
+
+    .main{position:relative;z-index:1;max-width:920px;margin:0 auto;padding:3rem 2rem 5rem;animation:fadeUp .5s ease both;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px);}to{opacity:1;transform:translateY(0);}}
+
+    .page-eyebrow{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.28em;color:var(--cyan);text-transform:uppercase;margin-bottom:.4rem;}
+    .page-title{font-family:var(--font-display);font-size:1.8rem;font-weight:900;letter-spacing:.06em;margin-bottom:2rem;}
+    .page-title .accent{color:var(--cyan);text-shadow:0 0 20px var(--cyan-glow);}
+
+    .error-banner{padding:.85rem 1.2rem;border-radius:4px;margin-bottom:1.5rem;background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.3);color:var(--red);font-family:var(--font-mono);font-size:.78rem;}
+
+    .form-card{background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:2.5rem;backdrop-filter:blur(16px);box-shadow:0 20px 60px rgba(0,0,0,.4);}
+    .form-card:hover{border-color:rgba(0,229,255,.2);box-shadow:0 25px 80px rgba(0,0,0,.5);}
+
+    .form-section{font-family:var(--font-mono);font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);display:flex;align-items:center;gap:.6rem;margin-bottom:1.2rem;margin-top:1.8rem;padding-bottom:.5rem;border-bottom:1px solid var(--border);}
+    .form-section:first-child{margin-top:0;}
+    .form-section i{font-size:.7rem;}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    .form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;}
+    @media(max-width:600px){.form-row,.form-row-3{grid-template-columns:1fr;}}
+    .form-group{margin-bottom:1.2rem;}
+    .form-label{display:block;font-family:var(--font-mono);font-size:.66rem;letter-spacing:.15em;text-transform:uppercase;color:var(--text-lo);margin-bottom:.4rem;}
+    .form-label i{color:var(--cyan);margin-right:.4rem;}
+    .form-label .req{color:var(--orange);margin-left:.2rem;}
+    .form-control{width:100%;background:rgba(0,229,255,.03);border:1px solid var(--border);border-radius:4px;color:var(--text-hi);font-family:var(--font-body);font-size:.95rem;padding:.75rem 1rem;outline:none;transition:border-color .25s,box-shadow .25s;}
+    .form-control:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim);}
+    .form-control::placeholder{color:var(--text-lo);}
+    textarea.form-control{resize:vertical;min-height:110px;}
+    select.form-control option{background:#0f0f1e;}
+
+    /* Stats mini-grid */
+    .stats-mini{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:.8rem;}
+    @media(max-width:600px){.stats-mini{grid-template-columns:1fr 1fr;}}
+    .stats-mini .form-group{margin-bottom:0;}
+
+    /* Checkboxes */
+    .checks-row{display:flex;gap:1rem;flex-wrap:wrap;}
+    .check-card{flex:1;min-width:180px;display:flex;align-items:center;gap:.7rem;padding:.85rem 1.1rem;border:1px solid var(--border);border-radius:6px;background:rgba(0,229,255,.02);cursor:pointer;transition:border-color .25s,background .25s;}
+    .check-card:hover{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.02);}
+    .check-card input[type=checkbox]{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;}
+    .check-label{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.08em;color:var(--text-mid);}
+    .check-label strong{color:var(--gold);}
+
+    /* Image */
+    .img-preview-wrap{margin-top:.6rem;border:1px solid var(--border);border-radius:6px;overflow:hidden;background:rgba(0,0,0,.3);}
+    .img-preview-wrap img{width:100%;max-height:180px;object-fit:contain;}
+    .clear-row{display:flex;align-items:center;gap:.5rem;margin-top:.5rem;font-family:var(--font-mono);font-size:.68rem;color:var(--text-lo);}
+    .clear-row input{accent-color:var(--red);}
+
+    .divider{height:1px;background:linear-gradient(to right,var(--border),transparent);margin:1.8rem 0;}
+
+    .form-actions{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;}
+    .btn-save{font-family:var(--font-display);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;padding:.85rem 2rem;background:var(--cyan);color:var(--bg-void);border:none;border-radius:3px;cursor:pointer;font-weight:700;box-shadow:0 0 20px var(--cyan-glow);transition:all .3s;display:inline-flex;align-items:center;gap:.5rem;}
+    .btn-save:hover{box-shadow:0 0 40px var(--cyan-glow);transform:translateY(-2px);}
+    .btn-cancel{font-family:var(--font-display);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;padding:.85rem 1.8rem;background:transparent;color:var(--text-mid);border:1px solid var(--border);border-radius:3px;text-decoration:none;transition:all .25s;display:inline-flex;align-items:center;gap:.5rem;}
+    .btn-cancel:hover{border-color:var(--cyan);color:var(--cyan);}
+    .meta-note{font-family:var(--font-mono);font-size:.62rem;color:var(--text-lo);letter-spacing:.08em;margin-left:auto;}
+
+    .hint{font-family:var(--font-mono);font-size:.62rem;color:var(--text-lo);letter-spacing:.06em;margin-top:.3rem;line-height:1.5;}
+
+    /* ── Card style picker ── */
+    .style-picker{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:.5rem;}
+    @media(max-width:600px){.style-picker{grid-template-columns:1fr;}}
+    .style-option{position:relative;cursor:pointer;}
+    .style-option input[type=radio]{position:absolute;opacity:0;width:0;height:0;}
+    .style-preview{
+      border:2px solid var(--border);border-radius:10px;
+      padding:1.1rem 1.2rem;background:rgba(0,229,255,.02);
+      transition:border-color .25s,background .25s,box-shadow .25s;
+      display:flex;flex-direction:column;gap:.6rem;
+    }
+    .style-option input:checked ~ .style-preview{
+      border-color:var(--cyan);background:rgba(0,229,255,.06);
+      box-shadow:0 0 0 3px var(--cyan-dim),0 8px 30px rgba(0,0,0,.4);
+    }
+    .style-preview:hover{border-color:rgba(0,229,255,.4);}
+    .style-label{
+      font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;
+      text-transform:uppercase;color:var(--text-hi);display:flex;align-items:center;gap:.5rem;
+    }
+    .style-label i{color:var(--cyan);}
+    .style-label .chosen-mark{margin-left:auto;color:var(--cyan);display:none;}
+    .style-option input:checked ~ .style-preview .chosen-mark{display:inline;}
+    .style-desc{font-family:var(--font-mono);font-size:.6rem;color:var(--text-lo);line-height:1.6;}
+    /* Mini card mockups */
+    .mock-long{border:1px solid var(--border);border-radius:6px;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;min-height:64px;}
+    .mock-img{background:linear-gradient(135deg,rgba(0,229,255,.12),rgba(168,85,247,.12));}
+    .mock-body{padding:.5rem .6rem;display:flex;flex-direction:column;gap:.3rem;}
+    .mock-line{height:4px;border-radius:2px;background:rgba(255,255,255,.12);}
+    .mock-line.w-full{width:100%;}.mock-line.w-2-3{width:66%;}.mock-line.w-1-2{width:50%;}.mock-line.w-1-3{width:33%;}
+    .mock-line.cyan{background:rgba(0,229,255,.4);}
+    .mock-short{border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;gap:.5rem;padding:.45rem .6rem;}
+    .mock-icon{width:20px;height:20px;border-radius:4px;background:rgba(0,229,255,.15);flex-shrink:0;}
+    .mock-short-lines{flex:1;display:flex;flex-direction:column;gap:.25rem;}
+  </style>
+</head>
+<body>
+<nav class="topbar">
+  <div class="topbar-brand"><i class="fas fa-folder-open"></i> PROJECTS ADMIN</div>
+  <a href="{% url 'project_dashboard' %}" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+</nav>
+
+<main class="main">
+  <p class="page-eyebrow">{% if mode == 'add' %}New{% else %}Edit{% endif %} Project</p>
+  <h1 class="page-title">
+    {% if mode == 'add' %}Add <span class="accent">Project</span>
+    {% else %}Edit <span class="accent">{{ proj.title|truncatechars:28 }}</span>{% endif %}
+  </h1>
+
+  {% if error %}<div class="error-banner"><i class="fas fa-exclamation-triangle" style="margin-right:.5rem;"></i>{{ error }}</div>{% endif %}
+
+  <div class="form-card">
+    <form method="post"
+          action="{% if mode == 'add' %}{% url 'project_add' %}{% else %}{% url 'project_edit' proj.pk %}{% endif %}"
+          enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- ── BASIC INFO ── -->
+      <div class="form-section"><i class="fas fa-info-circle"></i> Basic Info</div>
+
+      <div class="form-group">
+        <label class="form-label" for="f_title"><i class="fas fa-folder"></i>Project Title <span class="req">*</span></label>
+        <input type="text" id="f_title" name="title" class="form-control"
+               placeholder="e.g. Memory Gallery" required
+               value="{% if proj %}{{ proj.title }}{% endif %}">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f_subtitle"><i class="fas fa-heading"></i>Subtitle / Tagline</label>
+          <input type="text" id="f_subtitle" name="subtitle" class="form-control"
+                 placeholder="e.g. Secure Photo Journal"
+                 value="{% if proj %}{{ proj.subtitle }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_emoji"><i class="fas fa-smile"></i>Icon Emoji</label>
+          <input type="text" id="f_emoji" name="icon_emoji" class="form-control"
+                 placeholder="🚀" maxlength="4"
+                 value="{% if proj %}{{ proj.icon_emoji }}{% else %}🚀{% endif %}">
+          <p class="hint">Shown on small cards when no image is set.</p>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f_section"><i class="fas fa-layer-group"></i>Section <span class="req">*</span></label>
+          <select id="f_section" name="section" class="form-control">
+            {% for val, label in sections %}
+            <option value="{{ val }}" {% if proj and proj.section == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <p class="hint">Featured Work = large 2-column card. Cybersecurity = small grid card.</p>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_category"><i class="fas fa-tag"></i>Category / Badge</label>
+          <select id="f_category" name="category" class="form-control">
+            {% for val, label in categories %}
+            <option value="{{ val }}" {% if proj and proj.category == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="f_desc"><i class="fas fa-align-left"></i>Description <span class="req">*</span></label>
+        <textarea id="f_desc" name="description" class="form-control" required
+                  placeholder="Describe the project, technologies used, impact, and your role…">{% if proj %}{{ proj.description }}{% endif %}</textarea>
+      </div>
+
+      <!-- ── LINKS ── -->
+      <div class="form-section"><i class="fas fa-link"></i> Links</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f_live"><i class="fas fa-globe"></i>Live / Demo URL</label>
+          <input type="url" id="f_live" name="live_url" class="form-control"
+                 placeholder="https://…"
+                 value="{% if proj %}{{ proj.live_url }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_source"><i class="fab fa-github"></i>Source / GitHub URL</label>
+          <input type="url" id="f_source" name="source_url" class="form-control"
+                 placeholder="https://github.com/…"
+                 value="{% if proj %}{{ proj.source_url }}{% endif %}">
+        </div>
+      </div>
+
+      <!-- ── STATS ── -->
+      <div class="form-section"><i class="fas fa-chart-bar"></i> Key Stats (optional — 2 metrics)</div>
+      <div class="stats-mini">
+        <div class="form-group">
+          <label class="form-label" for="f_s1v">Stat 1 Value</label>
+          <input type="text" id="f_s1v" name="stat1_value" class="form-control" placeholder="100%"
+                 value="{% if proj %}{{ proj.stat1_value }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_s1l">Stat 1 Label</label>
+          <input type="text" id="f_s1l" name="stat1_label" class="form-control" placeholder="XSS / SQLi blocked"
+                 value="{% if proj %}{{ proj.stat1_label }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_s2v">Stat 2 Value</label>
+          <input type="text" id="f_s2v" name="stat2_value" class="form-control" placeholder="30%"
+                 value="{% if proj %}{{ proj.stat2_value }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_s2l">Stat 2 Label</label>
+          <input type="text" id="f_s2l" name="stat2_label" class="form-control" placeholder="Faster request handling"
+                 value="{% if proj %}{{ proj.stat2_label }}{% endif %}">
+        </div>
+      </div>
+
+      <!-- ── TAGS ── -->
+      <div class="form-section"><i class="fas fa-tags"></i> Tags</div>
+      <div class="form-group">
+        <label class="form-label" for="f_tags"><i class="fas fa-hashtag"></i>Tags</label>
+        <input type="text" id="f_tags" name="tags" class="form-control"
+               placeholder="Python, Django, Nginx, Linux"
+               value="{% if proj %}{{ proj.tags }}{% endif %}">
+        <p class="hint">Comma-separated tag list shown on the card.</p>
+      </div>
+
+      <!-- ── DISPLAY ── -->
+      <div class="form-section"><i class="fas fa-sliders"></i> Display Settings</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f_order"><i class="fas fa-sort"></i>Display Order</label>
+          <input type="number" id="f_order" name="display_order" class="form-control"
+                 min="0" placeholder="0 = first"
+                 value="{% if proj %}{{ proj.display_order }}{% else %}0{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_date"><i class="fas fa-calendar"></i>Date Label</label>
+          <input type="text" id="f_date" name="date_label" class="form-control"
+                 placeholder="Mar 2026"
+                 value="{% if proj %}{{ proj.date_label }}{% endif %}">
+        </div>
+      </div>
+
+      <div class="checks-row">
+        <label class="check-card" for="f_hl">
+          <input type="checkbox" id="f_hl" name="is_highlighted"
+                 {% if proj and proj.is_highlighted %}checked{% endif %}>
+          <span class="check-label"><strong>⭐ Highlight</strong> — gold glow, pin at top of section</span>
+        </label>
+        <label class="check-card" for="f_imgr" id="imgright-wrap">
+          <input type="checkbox" id="f_imgr" name="image_right"
+                 {% if proj and proj.image_right %}checked{% endif %}>
+          <span class="check-label"><strong>→ Image Right</strong> — put image on the right (Featured only)</span>
+        </label>
+      </div>
+
+      <!-- ── CARD STYLE PICKER ── -->
+      <div class="form-section" style="margin-top:1.8rem;"><i class="fas fa-layer-group"></i> Card Style on Projects Page</div>
+      <p class="hint" style="margin-bottom:.8rem;">Choose how this project card appears to visitors — per-project setting.</p>
+      <input type="hidden" name="card_style" id="f_card_style"
+             value="{% if proj %}{{ proj.card_style }}{% else %}long{% endif %}">
+      <div class="style-picker">
+
+        <!-- LONG CARD -->
+        <label class="style-option">
+          <input type="radio" name="_card_style_radio" value="long"
+                 {% if not proj or proj.card_style == 'long' %}checked{% endif %}
+                 onchange="document.getElementById('f_card_style').value='long'">
+          <div class="style-preview">
+            <div class="style-label">
+              <i class="fas fa-image"></i> Long Card
+              <i class="fas fa-check-circle chosen-mark"></i>
+            </div>
+            <!-- mini mockup -->
+            <div class="mock-long">
+              <div class="mock-img"></div>
+              <div class="mock-body">
+                <div class="mock-line cyan w-2-3"></div>
+                <div class="mock-line w-full"></div>
+                <div class="mock-line w-1-2"></div>
+                <div class="mock-line w-1-3"></div>
+              </div>
+            </div>
+            <p class="style-desc">Full 2-column layout with image panel on the left or right. Best for featured / hero projects.</p>
+          </div>
+        </label>
+
+        <!-- SHORT CARD -->
+        <label class="style-option">
+          <input type="radio" name="_card_style_radio" value="short"
+                 {% if proj and proj.card_style == 'short' %}checked{% endif %}
+                 onchange="document.getElementById('f_card_style').value='short'">
+          <div class="style-preview">
+            <div class="style-label">
+              <i class="fas fa-align-left"></i> Short Card
+              <i class="fas fa-check-circle chosen-mark"></i>
+            </div>
+            <!-- mini mockup -->
+            <div class="mock-short">
+              <div class="mock-icon"></div>
+              <div class="mock-short-lines">
+                <div class="mock-line cyan w-2-3"></div>
+                <div class="mock-line w-full"></div>
+              </div>
+            </div>
+            <div class="mock-short" style="margin-top:.3rem;">
+              <div class="mock-icon"></div>
+              <div class="mock-short-lines">
+                <div class="mock-line cyan w-1-2"></div>
+                <div class="mock-line w-2-3"></div>
+              </div>
+            </div>
+            <p class="style-desc">Icon + title, description, stats and tags — no image panel. Good for smaller or secondary projects.</p>
+          </div>
+        </label>
+
+      </div>
+
+      <!-- ── IMAGE ── -->
+      <div class="form-section"><i class="fas fa-image"></i> Project Image</div>
+      <div class="form-group">
+        <label class="form-label" for="f_img"><i class="fas fa-upload"></i>Upload Image (JPG / PNG)</label>
+        <input type="file" id="f_img" name="image" class="form-control"
+               accept="image/*" onchange="previewImg(this)">
+        {% if proj and proj.image %}
+        <div class="img-preview-wrap" style="margin-top:.6rem">
+          <img src="{{ proj.image.url }}" alt="Current image" id="img-preview">
+        </div>
+        <div class="clear-row">
+          <input type="checkbox" id="f_clear" name="clear_image">
+          <label for="f_clear">Remove current image</label>
+        </div>
+        {% else %}
+        <div class="img-preview-wrap" id="preview-wrap" style="display:none;margin-top:.6rem;">
+          <img src="" alt="Preview" id="img-preview">
+        </div>
+        {% endif %}
+        <div class="form-group" style="margin-top:.7rem;">
+          <label class="form-label" for="f_imgalt"><i class="fas fa-closed-captioning"></i>Image Alt Text</label>
+          <input type="text" id="f_imgalt" name="image_alt" class="form-control"
+                 placeholder="Descriptive alt text for the image"
+                 value="{% if proj %}{{ proj.image_alt }}{% endif %}">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-save">
+          <i class="fas fa-save"></i> {% if mode == 'add' %}Add Project{% else %}Save Changes{% endif %}
+        </button>
+        <a href="{% url 'project_dashboard' %}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+        {% if proj %}<span class="meta-note">ID #{{ proj.pk }}</span>{% endif %}
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  function previewImg(input) {
+    const wrap = document.getElementById('preview-wrap');
+    const prev = document.getElementById('img-preview');
+    if (input.files && input.files[0] && prev) {
+      const reader = new FileReader();
+      reader.onload = e => { prev.src = e.target.result; if(wrap) wrap.style.display=''; };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+  // Hide image-right checkbox for security section (it's a small card)
+  const sectionSel = document.getElementById('f_section');
+  const imgRightWrap = document.getElementById('imgright-wrap');
+  function toggleImgRight() {
+    imgRightWrap.style.opacity = sectionSel.value === 'featured' ? '1' : '0.3';
+    imgRightWrap.style.pointerEvents = sectionSel.value === 'featured' ? '' : 'none';
+  }
+  sectionSel.addEventListener('change', toggleImgRight);
+  toggleImgRight();
+</script>
+</body>
+</html>

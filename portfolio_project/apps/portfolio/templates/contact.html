@@ -1,0 +1,1003 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}Contact Me{% endblock title %}
+
+{% block body_content %}
+{% block content %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link
+  href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+  rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+  :root {
+    --bg-void: #050508;
+    --bg-deep: #0a0a14;
+    --bg-surface: #0f0f1e;
+    --bg-card: rgba(15, 15, 35, 0.9);
+    --cyan: #00e5ff;
+    --cyan-dim: rgba(0, 229, 255, 0.1);
+    --cyan-glow: rgba(0, 229, 255, 0.4);
+    --green: #39ff14;
+    --green-dim: rgba(57, 255, 20, 0.1);
+    --purple: #a855f7;
+    --orange: #ff6b35;
+    --text-hi: #f0f4ff;
+    --text-mid: #8892b0;
+    --text-lo: #4a5568;
+    --border: rgba(0, 229, 255, 0.14);
+    --font-display: 'Orbitron', monospace;
+    --font-body: 'Exo 2', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background: var(--bg-void);
+    color: var(--text-hi);
+    font-family: var(--font-body);
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.4;
+  }
+
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--bg-void);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--cyan);
+    border-radius: 2px;
+  }
+
+  /* ── PAGE HEADER ── */
+  .page-header {
+    position: relative;
+    padding: 7rem 2rem 4.5rem;
+    background: var(--bg-deep);
+    overflow: hidden;
+    text-align: center;
+  }
+
+  .page-header-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .page-header-glow {
+    position: absolute;
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(0, 229, 255, 0.06) 0, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .page-header-inner {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  .page-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.2s forwards;
+  }
+
+  .page-title {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 900;
+    color: var(--text-hi);
+    letter-spacing: 0.06em;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.35s forwards;
+  }
+
+  .page-title .accent {
+    color: var(--cyan);
+    text-shadow: 0 0 20px var(--cyan-glow);
+  }
+
+  .page-subtitle {
+    font-size: 1rem;
+    color: var(--text-mid);
+    line-height: 1.8;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.5s forwards;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    border: 1px solid rgba(57, 255, 20, 0.25);
+    background: rgba(57, 255, 20, 0.07);
+    padding: 0.4rem 1rem;
+    border-radius: 2px;
+    margin-top: 1.4rem;
+    opacity: 0;
+    animation: fadeUp 0.8s ease 0.65s forwards;
+  }
+
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: blink 2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.3;
+    }
+  }
+
+  /* ── CONTACT BODY ── */
+  .contact-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 5rem 2rem 6rem;
+    display: grid;
+    grid-template-columns: 1fr 390px;
+    gap: 4rem;
+    align-items: start;
+  }
+
+  @media (max-width: 960px) {
+    .contact-body {
+      grid-template-columns: 1fr;
+      gap: 3rem;
+    }
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.3em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, var(--border), transparent);
+    max-width: 80px;
+  }
+
+  .section-title {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--text-hi);
+    letter-spacing: 0.04em;
+    margin-bottom: 2rem;
+  }
+
+  /* ── FORM ── */
+  .form-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    padding: 2.5rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .form-card:hover {
+    border-color: rgba(0, 229, 255, 0.28);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .form-group {
+    margin-bottom: 1.4rem;
+  }
+
+  .form-label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    color: var(--text-lo);
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-label i {
+    color: var(--cyan);
+    margin-right: 0.4rem;
+  }
+
+  .form-control {
+    width: 100%;
+    background: rgba(0, 229, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-hi);
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 0.8rem 1rem;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    outline: none;
+  }
+
+  .form-control:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 0 3px var(--cyan-dim);
+  }
+
+  .form-control::placeholder {
+    color: var(--text-lo);
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 140px;
+  }
+
+  /* inline 2-col row */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 560px) {
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .btn-send {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0.9rem 2.4rem;
+    background: var(--cyan);
+    color: var(--bg-void);
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-weight: 700;
+    box-shadow: 0 0 20px var(--cyan-glow);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .btn-send:hover {
+    box-shadow: 0 0 35px var(--cyan-glow), 0 0 70px rgba(0, 229, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+  }
+
+  /* profile mini-card at top */
+  .profile-mini {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .profile-mini:hover {
+    border-color: rgba(0, 229, 255, 0.28);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .profile-mini-top {
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.06), rgba(168, 85, 247, 0.06));
+    border-bottom: 1px solid var(--border);
+    padding: 1.6rem 1.4rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .avatar-wrap {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .avatar-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    background: conic-gradient(var(--cyan), var(--purple), var(--cyan));
+    animation: spin 6s linear infinite;
+    z-index: 0;
+  }
+
+  .avatar-wrap::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--bg-deep);
+    z-index: 1;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .avatar-initials {
+    position: absolute;
+    inset: 3px;
+    border-radius: 50%;
+    z-index: 2;
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(168, 85, 247, 0.2));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: var(--cyan);
+    letter-spacing: 0.05em;
+  }
+
+  .avatar-online {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    z-index: 3;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    border: 2px solid var(--bg-deep);
+  }
+
+  .profile-mini-name {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-hi);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.2rem;
+  }
+
+  .profile-mini-role {
+    font-size: 0.8rem;
+    color: var(--text-mid);
+    line-height: 1.4;
+  }
+
+  .profile-mini-body {
+    padding: 1rem 1.4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.84rem;
+    color: var(--text-mid);
+  }
+
+  .contact-row i {
+    color: var(--cyan);
+    width: 15px;
+    text-align: center;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .contact-row a {
+    color: var(--text-mid);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .contact-row a:hover {
+    color: var(--cyan);
+  }
+
+  /* card generic */
+  .info-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    backdrop-filter: blur(12px);
+    overflow: hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+
+  .info-card:hover {
+    border-color: rgba(0, 229, 255, 0.28);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  }
+
+  .info-card-head {
+    padding: 0.95rem 1.4rem;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-hi);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  .info-card-head i {
+    color: var(--cyan);
+  }
+
+  .info-card-body {
+    padding: 1.1rem 1.4rem;
+  }
+
+  /* social grid */
+  .social-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem;
+  }
+
+  .social-btn {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-mid);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.25s ease;
+    background: rgba(0, 229, 255, 0.02);
+  }
+
+  .social-btn:hover {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    background: var(--cyan-dim);
+    transform: translateY(-2px);
+    box-shadow: 0 0 12px var(--cyan-dim);
+    text-decoration: none;
+  }
+
+  .social-btn i {
+    font-size: 0.9rem;
+  }
+
+  /* quick fact rows */
+  .fact-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 0.83rem;
+  }
+
+  .fact-row:last-child {
+    border-bottom: none;
+  }
+
+  .fact-label {
+    color: var(--text-lo);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+  }
+
+  .fact-value {
+    color: var(--cyan);
+    font-weight: 600;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .fact-value.green {
+    color: var(--green);
+  }
+
+  /* cert mini list */
+  .cert-mini {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .cert-mini:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .cert-mini-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .cert-mini-name {
+    font-size: 0.82rem;
+    color: var(--text-hi);
+    font-weight: 600;
+    line-height: 1.35;
+    margin-bottom: 0.15rem;
+  }
+
+  .cert-mini-sub {
+    font-family: var(--font-mono);
+    font-size: 0.63rem;
+    color: var(--text-lo);
+  }
+
+  /* response card */
+  .response-card {
+    padding: 1.1rem 1.4rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-card);
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    font-size: 0.84rem;
+    color: var(--text-mid);
+    transition: border-color 0.3s ease;
+  }
+
+  .response-card:hover {
+    border-color: rgba(0, 229, 255, 0.28);
+  }
+
+  .response-icon {
+    color: var(--cyan);
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .response-text strong {
+    color: var(--text-hi);
+    display: block;
+    margin-bottom: 0.15rem;
+    font-size: 0.87rem;
+  }
+
+  /* ── BOTTOM CTA ── */
+  .cta-strip {
+    background: var(--bg-deep);
+    border-top: 1px solid var(--border);
+    padding: 4rem 2rem;
+    text-align: center;
+  }
+
+  .cta-strip h2 {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--text-hi);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+  }
+
+  .cta-strip p {
+    color: var(--text-mid);
+    margin-bottom: 2rem;
+    max-width: 440px;
+    margin-left: auto;
+    margin-right: auto;
+    line-height: 1.8;
+  }
+
+  .cta-btns {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-glow {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.85rem 2rem;
+    background: var(--cyan);
+    color: var(--bg-void);
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: 0 0 20px var(--cyan-glow);
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-glow:hover {
+    box-shadow: 0 0 35px var(--cyan-glow);
+    transform: translateY(-2px);
+    color: var(--bg-void);
+    text-decoration: none;
+  }
+
+  .btn-outline {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 0.85rem 2rem;
+    background: transparent;
+    color: var(--cyan);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .btn-outline:hover {
+    border-color: var(--cyan);
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    text-decoration: none;
+    transform: translateY(-2px);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(26px);
+    transition: opacity 0.65s ease, transform 0.65s ease;
+  }
+
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .reveal-delay-1 {
+    transition-delay: 0.1s;
+  }
+
+  .reveal-delay-2 {
+    transition-delay: 0.2s;
+  }
+
+  .reveal-delay-3 {
+    transition-delay: 0.3s;
+  }
+
+  .reveal-delay-4 {
+    transition-delay: 0.4s;
+  }
+
+  @media (max-width: 500px) {
+    .social-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .cta-btns {
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+</style>
+
+<!-- ── PAGE HEADER ── -->
+<header class="page-header">
+  <div class="page-header-grid"></div>
+  <div class="page-header-glow"></div>
+  <div class="page-header-inner">
+    <p class="page-eyebrow">05 &mdash; Contact</p>
+    <h1 class="page-title">Get in <span class="accent">Touch</span></h1>
+    <p class="page-subtitle">
+      Have a project idea, a security question, or just want to talk tech?<br>
+      I&rsquo;m always open to interesting conversations.
+    </p>
+    <div class="status-badge">
+      <span class="status-dot"></span>
+      Available &mdash; Open to Work
+    </div>
+  </div>
+</header>
+
+<!-- ── CONTACT BODY ── -->
+<div class="contact-body">
+
+  <!-- ══ LEFT — FORM ══ -->
+  <div class="reveal">
+    <p class="section-label">01 &mdash; Message</p>
+    <h2 class="section-title">Send a Message</h2>
+    <div class="form-card">
+      <form action="{% url 'contact' %}" method="post">
+        {% csrf_token %}
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name" class="form-label"><i class="fas fa-user"></i>Full Name</label>
+            <input type="text" id="name" name="name" class="form-control" placeholder="Your name" required>
+          </div>
+          <div class="form-group">
+            <label for="email" class="form-label"><i class="fas fa-envelope"></i>Email Address</label>
+            <input type="email" id="email" name="email" class="form-control" placeholder="your@email.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="subject" class="form-label"><i class="fas fa-tag"></i>Subject</label>
+          <input type="text" id="subject" name="subject" class="form-control"
+            placeholder="e.g. Project Collaboration / Security Question">
+        </div>
+        <div class="form-group">
+          <label for="message" class="form-label"><i class="fas fa-comment-dots"></i>Message</label>
+          <textarea id="message" name="message" class="form-control"
+            placeholder="Tell me about your project, ask a security question, or just say hi..." required></textarea>
+        </div>
+        {% if success %}
+        <div style="margin-bottom:1rem;padding:0.9rem 1.2rem;border:1px solid rgba(57,255,20,0.35);border-radius:4px;background:rgba(57,255,20,0.08);color:#39ff14;font-family:var(--font-mono);font-size:0.82rem;letter-spacing:0.06em;">
+          <i class="fas fa-check-circle" style="margin-right:0.5rem;"></i> Message sent! I&rsquo;ll get back to you within 24 hours.
+        </div>
+        {% endif %}
+        {% if error %}
+        <div style="margin-bottom:1rem;padding:0.9rem 1.2rem;border:1px solid rgba(255,107,53,0.35);border-radius:4px;background:rgba(255,107,53,0.08);color:#ff6b35;font-family:var(--font-mono);font-size:0.82rem;letter-spacing:0.06em;">
+          <i class="fas fa-exclamation-triangle" style="margin-right:0.5rem;"></i> {{ error }}
+        </div>
+        {% endif %}
+        <button type="submit" class="btn-send">
+          <i class="fas fa-paper-plane"></i> Send Message
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ RIGHT — SIDEBAR ══ -->
+  <aside class="sidebar">
+
+    <!-- 1. Profile Mini Card -->
+    <div class="profile-mini reveal reveal-delay-1">
+      <div class="profile-mini-top">
+        <div class="avatar-wrap">
+          <div class="avatar-initials">PP</div>
+          <div class="avatar-online"></div>
+        </div>
+        <div>
+          <p class="profile-mini-name">Prashant Pal</p>
+          <p class="profile-mini-role">Certified Ethical Hacker &amp; B.Tech CSE Graduate</p>
+        </div>
+      </div>
+      <div class="profile-mini-body">
+        <div class="contact-row">
+          <i class="fas fa-envelope"></i>
+          <a href="mailto:palprashant8980@gmail.com">palprashant8980@gmail.com</a>
+        </div>
+        <div class="contact-row">
+          <i class="fas fa-phone"></i>
+          <a href="tel:+918839436332">+91 8839436332</a>
+        </div>
+        <div class="contact-row">
+          <i class="fas fa-map-marker-alt"></i>
+          <span>Shamgarh, Madhya Pradesh, India &nbsp;<span
+              style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-lo);">458883</span></span>
+        </div>
+        <div class="contact-row">
+          <i class="fas fa-graduation-cap"></i>
+          <span>B.Tech CSE &mdash; SPSU Udaipur, 2025</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Social Links -->
+    <div class="info-card reveal reveal-delay-2">
+      <div class="info-card-head"><i class="fas fa-share-nodes"></i> Connect Online</div>
+      <div class="info-card-body">
+        <div class="social-grid">
+          <a href="https://www.linkedin.com/in/prashantpal0405" target="_blank" class="social-btn">
+            <i class="fab fa-linkedin"></i> LinkedIn
+          </a>
+          <a href="https://github.com/prashantpal8980" target="_blank" class="social-btn">
+            <i class="fab fa-github"></i> GitHub
+          </a>
+          <a href="mailto:palprashant8980@gmail.com" class="social-btn">
+            <i class="fas fa-envelope"></i> Email
+          </a>
+          <a href="https://twitter.com/" target="_blank" class="social-btn">
+            <i class="fab fa-x-twitter"></i> Twitter / X
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Quick Facts -->
+    <div class="info-card reveal reveal-delay-3">
+      <div class="info-card-head"><i class="fas fa-terminal"></i> Quick Facts</div>
+      <div class="info-card-body">
+        <div class="fact-row">
+          <span class="fact-label">Status</span>
+          <span class="fact-value green">&#9679; Open to Work</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Focus</span>
+          <span class="fact-value">Cybersecurity</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Degree</span>
+          <span class="fact-value">B.Tech CSE</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Top Cert</span>
+          <span class="fact-value">CEH v13 AI</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Stack</span>
+          <span class="fact-value">Python / Django</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">OS</span>
+          <span class="fact-value">Linux &#128039;</span>
+        </div>
+        <div class="fact-row">
+          <span class="fact-label">Response</span>
+          <span class="fact-value">&lt; 24 hours</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Certifications -->
+    <div class="info-card reveal reveal-delay-4">
+      <div class="info-card-head"><i class="fas fa-certificate"></i> Certifications</div>
+      <div class="info-card-body">
+        <div class="cert-mini">
+          <div class="cert-mini-dot"></div>
+          <div>
+            <p class="cert-mini-name">Certified Ethical Hacker — CEH v13 AI</p>
+            <p class="cert-mini-sub">EC-Council &nbsp;&bull;&nbsp; Feb 2026 &nbsp;&bull;&nbsp; ID: ECC9023145867</p>
+          </div>
+        </div>
+        <div class="cert-mini">
+          <div class="cert-mini-dot"></div>
+          <div>
+            <p class="cert-mini-name">Cyber Security Expert Masters Program</p>
+            <p class="cert-mini-sub">Simplilearn &nbsp;&bull;&nbsp; Mar 2026</p>
+          </div>
+        </div>
+        <div class="cert-mini">
+          <div class="cert-mini-dot"></div>
+          <div>
+            <p class="cert-mini-name">CompTIA Security+ SY0-701</p>
+            <p class="cert-mini-sub">Simplilearn &nbsp;&bull;&nbsp; Feb 2026</p>
+          </div>
+        </div>
+        <div class="cert-mini">
+          <div class="cert-mini-dot"></div>
+          <div>
+            <p class="cert-mini-name">CISSP Assessment Completion</p>
+            <p class="cert-mini-sub">Simplilearn &nbsp;&bull;&nbsp; Mar 2026</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. Response time hint -->
+    <div class="response-card reveal reveal-delay-4">
+      <div class="response-icon"><i class="fas fa-bolt"></i></div>
+      <div class="response-text">
+        <strong>Quick Responder</strong>
+        Typically replies within 24 hours. For urgent inquiries reach out directly via email or phone.
+      </div>
+    </div>
+
+  </aside>
+</div>
+
+<!-- ── BOTTOM CTA ── -->
+<section class="cta-strip reveal">
+  <h2>Let&rsquo;s Build Something</h2>
+  <p>Interested in collaborating on a cybersecurity project or need a secure Django application? I&rsquo;m always up for
+    a challenge.</p>
+  <div class="cta-btns">
+    <a href="{% url 'projects' %}" class="btn-glow"><i class="fas fa-folder-open"></i> View Projects</a>
+    <a href="{% url 'about' %}" class="btn-outline"><i class="fas fa-user"></i> About Me</a>
+    <a href="https://github.com/prashantpal8980" target="_blank" class="btn-outline"><i class="fab fa-github"></i>
+      GitHub</a>
+  </div>
+</section>
+{% endblock content %}
+{% endblock body_content %}
+
+{% block scriptsextra %}
+<script>
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+{% endblock scriptsextra %}

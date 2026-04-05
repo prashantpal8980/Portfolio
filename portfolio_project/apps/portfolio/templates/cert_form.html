@@ -1,0 +1,311 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if mode == 'add' %}Add{% else %}Edit{% endif %} Certification — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Exo+2:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    :root{
+      --bg-void:#050508;--bg-deep:#0a0a14;--bg-card:rgba(15,15,35,.95);
+      --cyan:#00e5ff;--cyan-dim:rgba(0,229,255,.1);--cyan-glow:rgba(0,229,255,.35);
+      --gold:#ffd700;--purple:#a855f7;--orange:#ff6b35;--red:#ff4757;
+      --green:#39ff14;
+      --text-hi:#f0f4ff;--text-mid:#8892b0;--text-lo:#4a5568;
+      --border:rgba(0,229,255,.14);
+      --font-display:'Orbitron',monospace;--font-body:'Exo 2',sans-serif;--font-mono:'JetBrains Mono',monospace;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{background:var(--bg-void);color:var(--text-hi);font-family:var(--font-body);min-height:100vh;}
+    body::before{
+      content:'';position:fixed;inset:0;
+      background-image:linear-gradient(rgba(0,229,255,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(0,229,255,.025) 1px,transparent 1px);
+      background-size:50px 50px;pointer-events:none;z-index:0;
+    }
+
+    .topbar{
+      position:sticky;top:0;z-index:100;background:rgba(5,5,8,.92);
+      backdrop-filter:blur(14px);border-bottom:1px solid var(--border);
+      padding:0 2rem;height:64px;display:flex;align-items:center;justify-content:space-between;
+    }
+    .topbar-brand{
+      font-family:var(--font-display);font-size:.85rem;font-weight:700;
+      letter-spacing:.1em;color:var(--text-hi);display:flex;align-items:center;gap:.8rem;
+    }
+    .topbar-brand i{color:var(--cyan);}
+    .btn-back{
+      font-family:var(--font-mono);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+      padding:.45rem 1rem;background:transparent;color:var(--text-mid);
+      border:1px solid var(--border);border-radius:3px;cursor:pointer;text-decoration:none;
+      transition:all .25s ease;display:inline-flex;align-items:center;gap:.4rem;
+    }
+    .btn-back:hover{border-color:var(--cyan);color:var(--cyan);}
+
+    .main{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:3rem 2rem 5rem;animation:fadeUp .55s ease forwards;}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+    .page-eyebrow{font-family:var(--font-mono);font-size:.65rem;letter-spacing:.28em;color:var(--cyan);text-transform:uppercase;margin-bottom:.4rem;}
+    .page-title{font-family:var(--font-display);font-size:1.8rem;font-weight:900;letter-spacing:.06em;margin-bottom:2rem;}
+    .page-title .accent{color:var(--cyan);text-shadow:0 0 20px var(--cyan-glow);}
+
+    /* Error banner */
+    .error-banner{
+      padding:.85rem 1.2rem;border-radius:4px;margin-bottom:1.5rem;
+      background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.3);color:var(--red);
+      font-family:var(--font-mono);font-size:.78rem;
+    }
+
+    /* Form card */
+    .form-card{
+      background:var(--bg-card);border:1px solid var(--border);border-radius:12px;
+      padding:2.5rem;backdrop-filter:blur(16px);
+      box-shadow:0 20px 60px rgba(0,0,0,.4);
+      transition:border-color .3s,box-shadow .3s;
+    }
+    .form-card:hover{border-color:rgba(0,229,255,.22);box-shadow:0 25px 80px rgba(0,0,0,.5);}
+
+    .form-section{
+      font-family:var(--font-mono);font-size:.62rem;letter-spacing:.2em;
+      text-transform:uppercase;color:var(--cyan);
+      display:flex;align-items:center;gap:.6rem;
+      margin-bottom:1.2rem;margin-top:1.8rem;padding-bottom:.5rem;
+      border-bottom:1px solid var(--border);
+    }
+    .form-section:first-child{margin-top:0;}
+    .form-section i{font-size:.7rem;}
+
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+    @media(max-width:560px){.form-row{grid-template-columns:1fr;}}
+    .form-group{margin-bottom:1.3rem;}
+    .form-label{
+      display:block;font-family:var(--font-mono);font-size:.66rem;
+      letter-spacing:.15em;text-transform:uppercase;color:var(--text-lo);margin-bottom:.45rem;
+    }
+    .form-label i{color:var(--cyan);margin-right:.4rem;}
+    .form-label .req{color:var(--orange);margin-left:.2rem;}
+    .form-control{
+      width:100%;background:rgba(0,229,255,.03);border:1px solid var(--border);
+      border-radius:4px;color:var(--text-hi);font-family:var(--font-body);
+      font-size:.95rem;padding:.8rem 1rem;outline:none;
+      transition:border-color .25s,box-shadow .25s;
+    }
+    .form-control:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-dim);}
+    .form-control::placeholder{color:var(--text-lo);}
+    textarea.form-control{resize:vertical;min-height:120px;}
+    select.form-control option{background:#0f0f1e;}
+
+    /* Highlight checkbox */
+    .checkbox-row{
+      display:flex;align-items:center;gap:.7rem;
+      padding:.9rem 1.1rem;border:1px solid var(--border);border-radius:6px;
+      background:rgba(0,229,255,.02);cursor:pointer;
+      transition:border-color .25s,background .25s;
+    }
+    .checkbox-row:hover{border-color:rgba(255,215,0,.3);background:rgba(255,215,0,.03);}
+    .checkbox-row input[type=checkbox]{
+      width:16px;height:16px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;
+    }
+    .checkbox-label{
+      font-family:var(--font-mono);font-size:.75rem;letter-spacing:.08em;
+      color:var(--text-mid);
+    }
+    .checkbox-label strong{color:var(--gold);}
+
+    /* Image preview */
+    .img-preview-wrap{
+      margin-top:.6rem;border:1px solid var(--border);border-radius:6px;
+      overflow:hidden;background:rgba(0,0,0,.3);
+    }
+    .img-preview-wrap img{width:100%;max-height:200px;object-fit:contain;}
+
+    /* Clear image */
+    .clear-row{
+      display:flex;align-items:center;gap:.5rem;margin-top:.5rem;
+      font-family:var(--font-mono);font-size:.68rem;color:var(--text-lo);
+    }
+    .clear-row input{accent-color:var(--red);}
+
+    .divider{height:1px;background:linear-gradient(to right,var(--border),transparent);margin:1.8rem 0;}
+
+    .form-actions{display:flex;gap:.8rem;flex-wrap:wrap;align-items:center;}
+    .btn-save{
+      font-family:var(--font-display);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;
+      padding:.85rem 2rem;background:var(--cyan);color:var(--bg-void);
+      border:none;border-radius:3px;cursor:pointer;font-weight:700;
+      box-shadow:0 0 20px var(--cyan-glow);transition:all .3s ease;
+      display:inline-flex;align-items:center;gap:.5rem;
+    }
+    .btn-save:hover{box-shadow:0 0 40px var(--cyan-glow);transform:translateY(-2px);}
+    .btn-cancel{
+      font-family:var(--font-display);font-size:.76rem;letter-spacing:.12em;text-transform:uppercase;
+      padding:.85rem 1.8rem;background:transparent;color:var(--text-mid);
+      border:1px solid var(--border);border-radius:3px;text-decoration:none;
+      transition:all .25s ease;display:inline-flex;align-items:center;gap:.5rem;
+    }
+    .btn-cancel:hover{border-color:var(--cyan);color:var(--cyan);}
+    .meta-note{font-family:var(--font-mono);font-size:.62rem;color:var(--text-lo);letter-spacing:.08em;margin-left:auto;}
+  </style>
+</head>
+<body>
+<nav class="topbar">
+  <div class="topbar-brand"><i class="fas fa-certificate"></i> CERT ADMIN</div>
+  <a href="{% url 'cert_dashboard' %}" class="btn-back"><i class="fas fa-arrow-left"></i> Back</a>
+</nav>
+
+<main class="main">
+  <p class="page-eyebrow">{% if mode == 'add' %}New{% else %}Edit{% endif %} Certification</p>
+  <h1 class="page-title">
+    {% if mode == 'add' %}Add <span class="accent">Certification</span>
+    {% else %}Edit <span class="accent">{{ cert.title|truncatechars:30 }}</span>{% endif %}
+  </h1>
+
+  {% if error %}
+  <div class="error-banner"><i class="fas fa-exclamation-triangle" style="margin-right:.5rem;"></i>{{ error }}</div>
+  {% endif %}
+
+  <div class="form-card">
+    <form method="post"
+          action="{% if mode == 'add' %}{% url 'cert_add' %}{% else %}{% url 'cert_edit' cert.pk %}{% endif %}"
+          enctype="multipart/form-data">
+      {% csrf_token %}
+
+      <!-- ── BASIC INFO ── -->
+      <div class="form-section"><i class="fas fa-id-card"></i> Basic Info</div>
+
+      <div class="form-group">
+        <label class="form-label" for="f_title"><i class="fas fa-certificate"></i>Certification Title <span class="req">*</span></label>
+        <input type="text" id="f_title" name="title" class="form-control"
+               placeholder="e.g. Certified Ethical Hacker" required
+               value="{% if cert %}{{ cert.title }}{% endif %}">
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f_badge"><i class="fas fa-tag"></i>Badge / Short Tag</label>
+          <input type="text" id="f_badge" name="badge_label" class="form-control"
+                 placeholder="e.g. CEH v13  |  Masters  |  SY0-701"
+                 value="{% if cert %}{{ cert.badge_label }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_issuer"><i class="fas fa-building"></i>Issuing Organization <span class="req">*</span></label>
+          <input type="text" id="f_issuer" name="issuer" class="form-control"
+                 placeholder="e.g. EC-Council" required
+                 value="{% if cert %}{{ cert.issuer }}{% endif %}">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f_date"><i class="fas fa-calendar"></i>Issue Date <span class="req">*</span></label>
+          <input type="date" id="f_date" name="issue_date" class="form-control" required
+                 value="{% if cert %}{{ cert.issue_date|date:'Y-m-d' }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_level"><i class="fas fa-layer-group"></i>Level</label>
+          <select id="f_level" name="level" class="form-control">
+            {% for val, label in levels %}
+            <option value="{{ val }}" {% if cert and cert.level == val %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- ── CREDENTIAL ── -->
+      <div class="form-section"><i class="fas fa-fingerprint"></i> Credential Info</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f_cred_id"><i class="fas fa-hashtag"></i>Credential / Certificate ID</label>
+          <input type="text" id="f_cred_id" name="credential_id" class="form-control"
+                 placeholder="e.g. ECC9023145867"
+                 value="{% if cert %}{{ cert.credential_id }}{% endif %}">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="f_cred_url"><i class="fas fa-external-link-alt"></i>Verification URL</label>
+          <input type="url" id="f_cred_url" name="credential_url" class="form-control"
+                 placeholder="https://verify.example.com/…"
+                 value="{% if cert %}{{ cert.credential_url }}{% endif %}">
+        </div>
+      </div>
+
+      <!-- ── DESCRIPTION ── -->
+      <div class="form-section"><i class="fas fa-align-left"></i> Description</div>
+
+      <div class="form-group">
+        <label class="form-label" for="f_desc"><i class="fas fa-comment-dots"></i>Description</label>
+        <textarea id="f_desc" name="description" class="form-control"
+                  placeholder="Describe what this certification covers, its importance, exam details, etc.">{% if cert %}{{ cert.description }}{% endif %}</textarea>
+      </div>
+
+      <!-- ── DISPLAY ── -->
+      <div class="form-section"><i class="fas fa-sliders"></i> Display Settings</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="f_order"><i class="fas fa-sort"></i>Display Order</label>
+          <input type="number" id="f_order" name="display_order" class="form-control"
+                 min="0" placeholder="0 = first"
+                 value="{% if cert %}{{ cert.display_order }}{% else %}0{% endif %}">
+        </div>
+        <div class="form-group" style="display:flex;flex-direction:column;justify-content:flex-end;">
+          <label class="checkbox-row" for="f_highlight">
+            <input type="checkbox" id="f_highlight" name="is_highlighted"
+                   {% if cert and cert.is_highlighted %}checked{% endif %}>
+            <span class="checkbox-label"><strong>⭐ Highlight</strong> — pin to top with gold glow</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- ── CERTIFICATE IMAGE ── -->
+      <div class="form-section"><i class="fas fa-image"></i> Certificate Image</div>
+
+      <div class="form-group">
+        <label class="form-label" for="f_img"><i class="fas fa-upload"></i>Upload Image (JPG / PNG)</label>
+        <input type="file" id="f_img" name="certificate_image" class="form-control"
+               accept="image/*" onchange="previewImg(this)">
+        {% if cert and cert.certificate_image %}
+        <div class="img-preview-wrap" style="margin-top:.6rem;">
+          <img src="{{ cert.certificate_image.url }}" alt="Current certificate" id="img-preview">
+        </div>
+        <div class="clear-row">
+          <input type="checkbox" id="f_clear" name="clear_image">
+          <label for="f_clear">Remove current image</label>
+        </div>
+        {% else %}
+        <div class="img-preview-wrap" id="preview-wrap" style="display:none;margin-top:.6rem;">
+          <img src="" alt="Preview" id="img-preview">
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-save">
+          <i class="fas fa-save"></i> {% if mode == 'add' %}Add Certification{% else %}Save Changes{% endif %}
+        </button>
+        <a href="{% url 'cert_dashboard' %}" class="btn-cancel"><i class="fas fa-times"></i> Cancel</a>
+        {% if cert %}<span class="meta-note">ID #{{ cert.pk }}</span>{% endif %}
+      </div>
+    </form>
+  </div>
+</main>
+
+<script>
+  function previewImg(input) {
+    const wrap = document.getElementById('preview-wrap');
+    const prev = document.getElementById('img-preview');
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        if (prev) { prev.src = e.target.result; }
+        if (wrap) { wrap.style.display = ''; }
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+</body>
+</html>
